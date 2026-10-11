@@ -3,7 +3,7 @@ pipeline {
     agent { label 'linux' }
 
     environment {
-         APP_NNAME = 'retail-store'
+         APP_NAME = 'retail-store'
          BUILD_ENV = 'development'
     }
 
