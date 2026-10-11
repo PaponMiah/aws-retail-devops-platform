@@ -82,18 +82,23 @@ pipeline {
             }
         }
 
-        stage('Cart Compile') {
-            steps {
-                dir('application/src/cart') {
-                    sh './mvnw clean compile'
-                }
-            }
-        }
 
-        stage('Catalog Build') {
-            steps {
-                dir('application/src/catalog') {
-                    sh 'go build -o main main.go'
+        stage('Cart and Catalog Parallel Build') {
+            parallel {
+                stage('Cart Compile') {
+                    steps {
+                        dir('application/src/cart') {
+                            sh './mvnw clean compile'
+                        }
+                    }
+                }
+
+                stage('Catalog Build') {
+                    steps {
+                        dir('application/src/catalog') {
+                            sh 'go build -o main main.go'
+                        }
+                    }
                 }
             }
         }
