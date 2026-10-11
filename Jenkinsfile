@@ -31,6 +31,18 @@ pipeline {
         }
             }
 
+       stage('Staging Verification') {
+          when {
+             expression { params.DEPLOY_ENV == 'staging' }
+          }
+
+          steps {
+             echo 'Staging env selected'
+
+           }
+}
+
+
          stage('Checkout Source') {
             steps {
                 git branch: 'main',
