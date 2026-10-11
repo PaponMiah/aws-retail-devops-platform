@@ -59,6 +59,27 @@ pipeline {
 }
 
 
+        stage('Verify Nexus Authentication') {
+          steps {
+             withCredentials([
+               usernamePassword(
+                  credentialsId: 'nexus-maven-publisher',
+                  usernameVariable: 'NEXUS_USER',
+                  passwordVariable: 'NEXUS_PASS'
+            )
+        ]) {
+              sh '''
+                curl --silent --show-error --fail \
+                    --user "$NEXUS_USER:$NEXUS_PASS" \
+                    --output /dev/null \
+                    http://192.168.178.28:8081/repository/maven-snapshots/
+             '''
+             echo 'Nexus authentication request succeeded'
+        }
+    }
+}
+
+
          stage('Checkout Source') {
             steps {
                 git branch: 'main',
