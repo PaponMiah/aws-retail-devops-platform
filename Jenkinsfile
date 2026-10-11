@@ -7,17 +7,28 @@ pipeline {
          BUILD_ENV = 'development'
     }
 
+     parameters {
+        choice(
+           name: 'DEPLOY_ENV',
+           choices: ['development', 'staging', 'production'],
+           description: 'Select the target environment'
+        )
+
+    }
+
      triggers {
         pollSCM('H/5 * * * *')
     }
 
     stages {
-       
+
        stage('Verify Environment') {
             steps {
                sh 'echo "Application Name: $APP_NAME"'
                sh 'echo "Build Environment: $BUILD_ENV"'
-                  }
+               echo "Selected Environment: ${params.DEPLOY_ENV}"
+               //sh 'echo "Selected Environment: $DEPLOY_ENV"'
+        }
             }
 
          stage('Checkout Source') {
