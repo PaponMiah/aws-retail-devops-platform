@@ -31,6 +31,22 @@ pipeline {
         }
             }
 
+      stage('Parallel Verification') {
+          parallel {
+            stage('Check Java') {
+               steps {
+                  sh 'java -version'
+                  }
+            }
+
+            stage('Check Git') {
+               steps {
+                  sh 'git --version'
+               }
+            }
+         }
+      }
+
        stage('Staging Verification') {
           when {
              expression { params.DEPLOY_ENV == 'staging' }
