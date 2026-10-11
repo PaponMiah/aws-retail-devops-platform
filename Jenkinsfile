@@ -2,12 +2,25 @@
 pipeline {
     agent { label 'linux' }
 
+    environment {
+         APP_NNAME = 'retail-store'
+         BUILD_ENV = 'development'
+    }
+
      triggers {
         pollSCM('H/5 * * * *')
     }
 
     stages {
-        stage('Checkout Source') {
+       
+       stage('Verify Environment') {
+            steps {
+               sh 'echo "Application Name: $APP_NAME"'
+               sh 'echo "Build Environment: $BUILD_ENV"'
+                  }
+            }
+
+         stage('Checkout Source') {
             steps {
                 git branch: 'main',
                     credentialsId: 'github-retail-store-ci',
