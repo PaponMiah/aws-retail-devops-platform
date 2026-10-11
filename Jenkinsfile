@@ -2,6 +2,10 @@
 pipeline {
     agent { label 'linux' }
 
+     triggers {
+        pollSCM('H/5 * * * *')
+    }
+
     stages {
         stage('Checkout Source') {
             steps {
