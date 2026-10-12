@@ -1,4 +1,3 @@
-
 pipeline {
     agent { label 'linux' }
 
@@ -7,80 +6,56 @@ pipeline {
          BUILD_ENV = 'development'
     }
 
-     parameters {
+    parameters {
         choice(
            name: 'DEPLOY_ENV',
            choices: ['development', 'staging', 'production'],
            description: 'Select the target environment'
         )
-
     }
 
-     triggers {
+    triggers {
         pollSCM('H/5 * * * *')
     }
 
     stages {
 
-       stage('Verify Environment') {
+        stage('Verify Environment') {
             steps {
-               sh 'echo "Application Name: $APP_NAME"'
-               sh 'echo "Build Environment: $BUILD_ENV"'
-               echo "Selected Environment: ${params.DEPLOY_ENV}"
-               //sh 'echo "Selected Environment: $DEPLOY_ENV"'
+                sh 'echo "Application Name: $APP_NAME"'
+                sh 'echo "Build Environment: $BUILD_ENV"'
+                echo "Selected Environment: ${params.DEPLOY_ENV}"
+                //sh 'echo "Selected Environment: $DEPLOY_ENV"'
+            }
         }
+
+        stage('Parallel Verification') {
+            parallel {
+                stage('Check Java') {
+                    steps {
+                        sh 'java -version'
+                    }
+                }
+
+                stage('Check Git') {
+                    steps {
+                        sh 'git --version'
+                    }
+                }
             }
-
-      stage('Parallel Verification') {
-          parallel {
-            stage('Check Java') {
-               steps {
-                  sh 'java -version'
-                  }
-            }
-
-            stage('Check Git') {
-               steps {
-                  sh 'git --version'
-               }
-            }
-         }
-      }
-
-       stage('Staging Verification') {
-          when {
-             expression { params.DEPLOY_ENV == 'staging' }
-          }
-
-          steps {
-             echo 'Staging env selected'
-
-           }
-}
-
-
-        stage('Verify Nexus Authentication') {
-          steps {
-             withCredentials([
-               usernamePassword(
-                  credentialsId: 'nexus-maven-publisher',
-                  usernameVariable: 'NEXUS_USER',
-                  passwordVariable: 'NEXUS_PASS'
-            )
-        ]) {
-              sh '''
-                curl --silent --show-error --fail \
-                    --user "$NEXUS_USER:$NEXUS_PASS" \
-                    --output /dev/null \
-                    http://192.168.178.28:8081/repository/maven-snapshots/
-             '''
-             echo 'Nexus authentication request succeeded'
         }
-    }
-}
 
+        stage('Staging Verification') {
+            when {
+                expression { params.DEPLOY_ENV == 'staging' }
+            }
 
-         stage('Checkout Source') {
+            steps {
+                echo 'Staging env selected'
+            }
+        }
+
+        stage('Checkout Source') {
             steps {
                 git branch: 'main',
                     credentialsId: 'github-retail-store-ci',
@@ -102,7 +77,6 @@ pipeline {
                 }
             }
         }
-
 
         stage('Cart and Catalog Parallel Build') {
             parallel {
@@ -137,6 +111,37 @@ pipeline {
             steps {
                 dir('application/src/orders') {
                     sh './mvnw clean compile'
+                }
+            }
+        }
+
+        stage('Publish Cart to Nexus') {
+            steps {
+                dir('application/src/cart') {
+
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'nexus-maven-publisher',
+                            usernameVariable: 'NEXUS_USER',
+                            passwordVariable: 'NEXUS_PASS'
+                        )
+                    ]) {
+
+                        configFileProvider([
+                            configFile(
+                                fileId: 'ede0529a-cfcb-4bb4-ac59-c24ee53fd928',
+                                variable: 'MAVEN_SETTINGS'
+                            )
+                        ]) {
+
+                            sh '''
+                                set +x
+
+                                ./mvnw -B -s "$MAVEN_SETTINGS" clean deploy -DskipTests \
+                                  -DaltSnapshotDeploymentRepository=nexus-snapshots::http://192.168.178.28:8081/repository/maven-snapshots/
+                            '''
+                        }
+                    }
                 }
             }
         }
