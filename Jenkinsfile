@@ -147,6 +147,19 @@ pipeline {
         }
     }
 
+
+       stage('Archive Cart Artifact') {
+           steps {
+              archiveArtifacts(
+                 artifacts: 'application/src/cart/target/*.jar',
+                 fingerprint: true,
+                 allowEmptyArchive: false
+              )
+          }
+      }
+
+
+
     post {
         always {
             junit 'application/src/ui/target/surefire-reports/TEST-*.xml'
