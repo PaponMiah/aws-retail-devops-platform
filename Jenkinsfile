@@ -145,7 +145,7 @@ pipeline {
                 }
             }
         }
-    }
+  
 
 
        stage('Archive Cart Artifact') {
@@ -158,7 +158,7 @@ pipeline {
           }
       }
 
-
+}
 
     post {
         always {
