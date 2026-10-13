@@ -74,6 +74,7 @@ pipeline {
             steps {
                 dir('application/src/ui') {
                     sh './mvnw clean test'
+                    sh 'exit 1'
                 }
             }
         }
