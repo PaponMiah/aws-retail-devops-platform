@@ -57,9 +57,7 @@ pipeline {
 
         stage('Checkout Source') {
             steps {
-                git branch: 'main',
-                    credentialsId: 'github-retail-store-ci',
-                    url: 'git@github.com:PaponMiah/aws-retail-devops-platform.git'
+                checkout scm
             }
         }
 
@@ -116,7 +114,14 @@ pipeline {
         }
 
         stage('Publish Cart to Nexus') {
-            steps {
+           
+             when {
+                expression {
+                    env.BRANCH_NAME == null || env.BRANCH_NAME == 'main'
+                }
+             }
+
+               steps {
                 dir('application/src/cart') {
 
                     withCredentials([
