@@ -81,7 +81,7 @@ pipeline {
                 stage('Cart Compile') {
                     steps {
                         dir('application/src/cart') {
-                            sh './mvnw clean compile'
+                            sh './mvnw clean package -DskipTests'
                         }
                     }
                 }
