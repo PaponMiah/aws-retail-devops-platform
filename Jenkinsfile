@@ -78,17 +78,25 @@ pipeline {
 
         stage('Cart and Catalog Parallel Build') {
             parallel {
-                stage('Cart Compile') {
-                    steps {
-                        dir('application/src/cart') {
-                            sh './mvnw clean package -DskipTests'
+               stage('Cart Build and Test') {
+                  steps {
+                     dir('application/src/cart') {
+                         withEnv([
+                            'AWS_ACCESS_KEY_ID=dummy',
+                            'AWS_SECRET_ACCESS_KEY=dummy',
+                            'AWS_REGION=us-west-2'
+                        ]) {
+                            sh './mvnw clean package'
                         }
                     }
-                }
+               }
+        }
 
-                stage('Catalog Build') {
+                stage('Catalog Build and Test') {
                     steps {
                         dir('application/src/catalog') {
+
+                            sh 'go test -v ./...'
                             sh 'go build -o main main.go'
                         }
                     }
@@ -96,19 +104,20 @@ pipeline {
             }
         }
 
-        stage('Checkout Build') {
+        stage('Checkout Build and Test') {
             steps {
                 dir('application/src/checkout') {
-                    sh 'yarn install'
+                    sh 'yarn install --immutable'
+                    sh 'yarn test:integration'
                     sh 'yarn build'
                 }
             }
         }
 
-        stage('Orders Compile') {
+        stage('Orders Build and Test') {
             steps {
                 dir('application/src/orders') {
-                    sh './mvnw clean compile'
+                    sh './mvnw clean package'
                 }
             }
         }
@@ -165,9 +174,10 @@ pipeline {
 
 }
 
-    post {
-        always {
-            junit 'application/src/ui/target/surefire-reports/TEST-*.xml'
-        }
-    }
+       post {
+          always {
+              junit testResults: 'application/src/{ui,cart,orders}/target/surefire-reports/TEST-*.xml',
+                    allowEmptyResults: true
+          }
+      }
 }
