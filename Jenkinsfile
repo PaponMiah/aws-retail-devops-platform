@@ -151,7 +151,7 @@ pipeline {
                             sh '''
                                 set +x
 
-                                ./mvnw -B -s "$MAVEN_SETTINGS" clean deploy -DskipTests \
+                                ./mvnw -B -s "$MAVEN_SETTINGS" deploy -DskipTests \
                                   -DaltSnapshotDeploymentRepository=nexus-snapshots::http://192.168.178.28:8081/repository/maven-snapshots/
                             '''
                         }
@@ -176,7 +176,7 @@ pipeline {
 
        post {
           always {
-              junit testResults: 'application/src/{ui,cart,orders}/target/surefire-reports/TEST-*.xml',
+              junit testResults: 'application/src/**/target/surefire-reports/TEST-*.xml',
                     allowEmptyResults: true
           }
       }
