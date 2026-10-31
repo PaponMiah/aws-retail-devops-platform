@@ -95,8 +95,11 @@ pipeline {
                 stage('Catalog Build and Test') {
                     steps {
                         dir('application/src/catalog') {
-
-                            sh 'go test -v ./...'
+                            sh '''#!/bin/bash
+                               mkdir -p test-results
+                               set -o pipefail
+                               go test -v ./... 2>&1 | "$HOME/go/bin/go-junit-report" -set-exit-code > test-results/catalog-junit.xml
+                            '''
                             sh 'go build -o main main.go'
                         }
                     }
@@ -176,7 +179,7 @@ pipeline {
 
        post {
           always {
-              junit testResults: 'application/src/**/target/surefire-reports/TEST-*.xml',
+              junit testResults: 'application/src/**/target/surefire-reports/TEST-*.xml,application/src/catalog/test-results/*.xml',
                     allowEmptyResults: true
           }
       }
