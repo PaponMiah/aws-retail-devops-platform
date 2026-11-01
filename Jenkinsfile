@@ -98,7 +98,7 @@ pipeline {
                             sh '''#!/bin/bash
                                mkdir -p test-results
                                set -o pipefail
-                               go test -count=1 -coverpkg=./... -coverprofile=test-results/catalog-coverage.out -v ./test 2>&1 | "$HOME/go/bin/go-junit-report" -set-exit-code > test-results/catalog-junit.xml
+                               go test -count=1 -coverpkg=./... -coverprofile=test-results/catalog-coverage.out -v ./... 2>&1 | "$HOME/go/bin/go-junit-report" -set-exit-code > test-results/catalog-junit.xml
                             '''
                             sh 'go build -o main main.go'
                         }
