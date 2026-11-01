@@ -112,12 +112,8 @@ pipeline {
                 dir('application/src/checkout') {
                     sh 'yarn install --immutable'
 
-                    sh '''
-                       mkdir -p test-results
-                       JEST_JUNIT_OUTPUT_DIR=./test-results \
-                       JEST_JUNIT_OUTPUT_NAME=checkout-junit.xml \
-                       yarn test:integration --reporters=default --reporters=jest-junit
-                    '''
+                    sh 'yarn test:integration'
+               
 
                     sh 'yarn build'
                 }
