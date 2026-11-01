@@ -111,7 +111,14 @@ pipeline {
             steps {
                 dir('application/src/checkout') {
                     sh 'yarn install --immutable'
-                    sh 'yarn test:integration'
+
+                    sh '''
+                       mkdir -p test-results
+                       JEST_JUNIT_OUTPUT_DIR=./test-results \
+                       JEST_JUNIT_OUTPUT_NAME=checkout-junit.xml \
+                       yarn test:integration --reporters=default --reporters=jest-junit
+                    '''
+
                     sh 'yarn build'
                 }
             }
@@ -179,7 +186,7 @@ pipeline {
 
        post {
           always {
-              junit testResults: 'application/src/**/target/surefire-reports/TEST-*.xml,application/src/catalog/test-results/*.xml',
+              junit testResults: 'application/src/**/target/surefire-reports/TEST-*.xml,application/src/catalog/test-results/*.xml,application/src/checkout/test-results/*.xml',
                     allowEmptyResults: true
           }
       }
