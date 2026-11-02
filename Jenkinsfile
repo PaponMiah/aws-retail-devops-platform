@@ -112,11 +112,12 @@ pipeline {
                 dir('application/src/checkout') {
                     sh 'yarn install --immutable'
 
-                    sh 'yarn test:integration'
-               
+                    sh 'rm -f junit.xml'
+
+                    sh 'JEST_JUNIT_OUTPUT_FILE=junit.xml yarn test:integration --reporters=default --reporters=jest-junit'
 
                     sh 'yarn build'
-                }
+               }
             }
         }
 
