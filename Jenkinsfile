@@ -74,8 +74,8 @@ pipeline {
             }
         }
 
-        stage('Cart and Catalog Parallel Build') {
-            parallel {
+        stage('Cart and Catalog Sequential Build') {
+            stages {
                stage('Cart Build and Test') {
                   steps {
                      dir('application/src/cart') {
