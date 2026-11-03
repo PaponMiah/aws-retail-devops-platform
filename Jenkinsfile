@@ -84,7 +84,7 @@ pipeline {
                             'AWS_SECRET_ACCESS_KEY=dummy',
                             'AWS_REGION=us-west-2'
                         ]) {
-                            sh './mvnw clean package'
+                            sh './mvnw clean verify'
                         }
                     }
                }
