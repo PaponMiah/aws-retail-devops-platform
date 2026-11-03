@@ -128,6 +128,31 @@ pipeline {
             }
         }
 
+
+
+       stage('SonarQube Analysis - Cart') {
+           steps {
+               script {
+                    def scannerHome = tool 'SonarScanner'
+
+                    withSonarQubeEnv('SonarQube-Local') {
+                        dir('application/src/cart') {
+                             sh """
+                                 "${scannerHome}/bin/sonar-scanner" \
+                                    -Dsonar.projectKey=retail-cart \
+                                    -Dsonar.projectName=retail-cart \
+                                    -Dsonar.sources=src/main \
+                                    -Dsonar.tests=src/test \
+                                    -Dsonar.java.binaries=target/classes
+                             """
+                        }
+                    }
+                }
+            }
+       }
+ 
+
+
         stage('Publish Cart to Nexus') {
            
              when {
