@@ -42,7 +42,11 @@ var dbConfig config.DatabaseConfiguration
 
 func TestMain(m *testing.M) {
 	ctx := context.Background()
-	container, port, _ := prepareContainer(ctx)
+
+	container, port, err := prepareContainer(ctx)
+	if err != nil {
+		log.Fatalf("Failed to prepare MySQL test container: %v", err)
+	}
 
 	endpoint := fmt.Sprintf("localhost:%s", port)
 
