@@ -26,6 +26,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -99,7 +100,9 @@ func prepareContainer(ctx context.Context) (testcontainers.Container, string, er
 	req := testcontainers.ContainerRequest{
 		Image:        "mysql:8.0",
 		ExposedPorts: []string{"3306/tcp"},
-		WaitingFor:   wait.ForLog("3306"),
+
+		WaitingFor: wait.ForLog("ready for connections").WithOccurrence(2).WithStartupTimeout(3 * time.Minute),
+
 		Env: map[string]string{
 			"MYSQL_ROOT_PASSWORD":        "unittest123",
 			"MYSQL_ALLOW_EMPTY_PASSWORD": "true",
