@@ -179,7 +179,6 @@ pipeline {
                 }
             }
        }
- 
 
 
        stage('SonarQube Quality Gate - CART') {
@@ -191,8 +190,40 @@ pipeline {
        }
 
 
+
+      stage('SonarQube Analysis - Catalog') {
+         steps {
+             script {
+                 def scannerHome = tool 'SonarScanner'
+
+                 withSonarQubeEnv('SonarQube-Local') {
+                     dir('application/src/catalog') {
+                         sh """
+                             "${scannerHome}/bin/sonar-scanner" \
+                               -Dsonar.projectKey=retail-catalog \
+                               -Dsonar.projectName=retail-catalog \
+                               -Dsonar.sources=. \
+                               -Dsonar.tests=test \
+                               -Dsonar.exclusions=test/**,test-results/**,vendor/** \
+                               -Dsonar.test.inclusions=**/*_test.go \
+                               -Dsonar.go.coverage.reportPaths=test-results/catalog-coverage.out
+                          """
+                      }
+                 }
+             }
+         }
+      }
+
+       stage('SonarQube Quality Gate - Catalog') {
+           steps {
+               timeout(time: 5, unit: 'MINUTES') {
+                  waitForQualityGate abortPipeline: true
+               }
+           }
+       }
+
         stage('Publish Cart to Nexus') {
-           
+
              when {
                 expression {
                     env.BRANCH_NAME == null || env.BRANCH_NAME == 'main'
@@ -228,7 +259,7 @@ pipeline {
                 }
             }
         }
-  
+
 
 
        stage('Archive Cart Artifact') {
