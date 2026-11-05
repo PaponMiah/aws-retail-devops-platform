@@ -129,6 +129,12 @@ pipeline {
 
         stage('SonarQube Analysis - UI') {
             steps {
+
+                sh '''
+                   find application/src/ui application/src/cart application/src/catalog \
+                     -path '*/.scannerwork/report-task.txt' -type f -delete
+                '''
+
                 script {
                     def scannerHome = tool 'SonarScanner'
 
@@ -161,6 +167,13 @@ pipeline {
 
        stage('SonarQube Analysis - Cart') {
            steps {
+
+               sh '''
+                  find application/src/ui application/src/cart application/src/catalog \
+                    -path '*/.scannerwork/report-task.txt' -type f -delete
+               '''
+
+
                script {
                     def scannerHome = tool 'SonarScanner'
 
@@ -193,6 +206,12 @@ pipeline {
 
       stage('SonarQube Analysis - Catalog') {
          steps {
+
+            sh '''
+               find application/src/ui application/src/cart application/src/catalog \
+                 -path '*/.scannerwork/report-task.txt' -type f -delete
+            '''
+
              script {
                  def scannerHome = tool 'SonarScanner'
 
