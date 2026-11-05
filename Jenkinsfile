@@ -69,7 +69,7 @@ pipeline {
         stage('UI Build and Test') {
             steps {
                 dir('application/src/ui') {
-                    sh './mvnw clean test'
+                    sh './mvnw clean verify'
                 }
             }
         }
@@ -127,6 +127,36 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis - UI') {
+            steps {
+                script {
+                    def scannerHome = tool 'SonarScanner'
+
+                    withSonarQubeEnv('SonarQube-Local') {
+                        dir('application/src/ui') {
+                            sh """
+                                "${scannerHome}/bin/sonar-scanner" \
+                                    -Dsonar.projectKey=retail-ui \
+                                    -Dsonar.projectName=retail-ui \
+                                    -Dsonar.sources=src/main \
+                                    -Dsonar.tests=src/test \
+                                    -Dsonar.java.binaries=target/classes \
+                                    -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+                            """
+                        }
+                    }
+                }
+            }
+       }
+
+
+       stage('SonarQube Quality Gate - UI') {
+           steps {
+              timeout(time: 5, unit: 'MINUTES') {
+                 waitForQualityGate abortPipeline: true
+              }
+           }
+       }
 
 
        stage('SonarQube Analysis - Cart') {
@@ -152,7 +182,7 @@ pipeline {
  
 
 
-       stage('SonarQube Quality Gate') {
+       stage('SonarQube Quality Gate - CART') {
            steps {
                timeout(time: 5, unit: 'MINUTES') {
                   waitForQualityGate abortPipeline: true
